@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner's Report — P&L · June 2026 | Sig Zane Designs</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — identical to balance_sheet_report
+═══════════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+
+  /* Surface colors */
+  --bg:          #fdf8f0;
+  --card:        #ffffff;
+  --surface:     #fef6e8;
+  --cream:       #f5ead8;
+  --border:      #e8dcc8;
+  --chart-grid:  #e0d0b8;
+
+  /* Brand colors */
+  --header-bg:   #F4A820;
+  --accent:      #d4890a;
+  --gold:        #c07d08;
+  --yellow:      #e6b800;
+  --bright-yellow:#f0c830;
+  --orange:      #cc5500;
+  --deep:        #a05a08;
+  --dark-brown:  #4a2800;
+
+  /* Semantic colors */
+  --text:        #2a1f10;
+  --muted:       #7a6a55;
+  --positive:    #2a7a30;
+  --negative:    #c03020;
+  --caution:     #b86a08;
+
+  /* Tinted surfaces */
+  --tint-red:    #faddda;
+  --tint-green:  #d8f0dc;
+  --tint-amber:  #fdeec8;
+  --tint-blue:   #d8e8ff;
+
+  /* Alert surfaces */
+  --alert-warn-bg:  #fff5f5;
+  --alert-warn-bd:  #f5c0b8;
+  --alert-good-bg:  #f2faf3;
+  --alert-good-bd:  #aaddb5;
+  --alert-text:     #3a2a18;
+
+  /* Type scale — 4 steps + display */
+  --t-xs:    0.68rem;
+  --t-sm:    0.75rem;
+  --t-base:  0.85rem;
+  --t-lg:    1.1rem;
+  --t-xl:    1.4rem;
+  --t-2xl:   1.8rem;
+  --t-3xl:   2.0rem;
+  --t-title: 1.65rem;
+
+  /* Label defaults */
+  --lbl-weight:  700;
+  --lbl-spacing: 0.06em;
+
+  /* Layout */
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--t-base);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════
+   HEADER — matches balance sheet exactly
+═══════════════════════════════════════════════════ */
+.page-banner {
+  background: var(--header-bg);
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.banner-left  { display: flex; align-items: center; gap: 18px; }
+.logo-box     { width: 90px; height: 64px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-box img { width: 90px; height: auto; object-fit: contain; }
+.banner-title { color: #fff; }
+.banner-title .co-name {
+  font-size: var(--t-xs); letter-spacing: 0.15em;
+  text-transform: uppercase; opacity: .85; font-weight: var(--lbl-weight); margin-bottom: 4px;
+}
+.banner-title h1  { font-size: var(--t-title); font-weight: 800; line-height: 1.05; }
+.banner-title .banner-sub { font-size: var(--t-sm); opacity: .8; margin-top: 5px; }
+
+.banner-kpis  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 320px; }
+.bkpi         { background: rgba(255,255,255,.22); border-radius: var(--radius); padding: 11px 15px; color: #fff; }
+.bkpi.dark    { background: rgba(0,0,0,.15); }
+.bkpi-label   { font-size: var(--t-xs); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase; opacity: .8; margin-bottom: 4px; }
+.bkpi-val     { font-size: var(--t-xl); font-weight: 800; line-height: 1; }
+.bkpi-sub     { font-size: var(--t-xs); opacity: .75; margin-top: 3px; }
+
+/* ═══════════════════════════════════════════════════
+   BODY LAYOUT
+═══════════════════════════════════════════════════ */
+.body-wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 72px; }
+
+/* ── Alerts ── */
+.alert {
+  border-radius: var(--radius); padding: 13px 17px; margin-bottom: 11px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.alert.warn { background: var(--alert-warn-bg); border: 1px solid var(--alert-warn-bd); border-left: 3px solid var(--negative); }
+.alert.good { background: var(--alert-good-bg); border: 1px solid var(--alert-good-bd); border-left: 3px solid var(--positive); }
+.alert .ai  { font-size: var(--t-lg); flex-shrink: 0; margin-top: 2px; }
+.alert h3   { font-size: var(--t-base); font-weight: var(--lbl-weight); margin-bottom: 3px; }
+.alert.warn h3 { color: var(--negative); }
+.alert.good h3 { color: var(--positive); }
+.alert p    { color: var(--alert-text); font-size: var(--t-base); }
+
+/* ── Section heads ── */
+.sec      { display: flex; align-items: center; gap: 10px; margin: 36px 0 15px; }
+.sec-tag  {
+  font-size: var(--t-sm); font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--accent);
+  background: var(--cream); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+}
+.sec h2   { font-size: var(--t-sm); font-weight: 600; color: var(--muted); }
+.sec .rule{ flex: 1; height: 1px; background: var(--border); }
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.card-title { font-size: var(--t-base); font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.card-sub   { font-size: var(--t-sm); color: var(--muted); margin-bottom: 16px; }
+
+/* ── KPI Grid (dual-period: June | YTD) ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 8px; }
+.kc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  border-top: 3px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+.kc.green { border-top-color: var(--positive); }
+.kc.red   { border-top-color: var(--negative); }
+.kc.yellow{ border-top-color: var(--yellow); }
+.kc.gray  { border-top-color: var(--muted); }
+.kc-lbl   { font-size: var(--t-sm); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.kc-periods { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 8px; align-items: start; }
+.kc-divider { background: var(--border); align-self: stretch; }
+.kc-period-lbl { font-size: var(--t-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.kc-val     { font-size: var(--t-2xl); font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1.1; }
+.kc-val.neg { color: var(--negative); }
+.kc-val.pos { color: var(--positive); }
+
+/* ── Two/three column grids ── */
+.two-col   { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+.two-col > *  { flex: 1 1 calc(50% - 7px); min-width: 280px; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+
+/* ── Island cards ── */
+.island-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
+.island-card {
+  background: var(--surface); border-radius: 10px; padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+}
+.island-card.sec { border-left-color: var(--muted); }
+.island-name { font-size: var(--t-xs); font-weight: var(--lbl-weight); text-transform: uppercase; letter-spacing: var(--lbl-spacing); color: var(--muted); margin-bottom: 4px; }
+.island-ytd  { font-size: var(--t-lg); font-weight: 700; color: var(--text); }
+.island-jun  { font-size: var(--t-sm); color: var(--muted); margin-top: 2px; }
+.island-pct  {
+  display: inline-block; font-size: var(--t-xs); font-weight: var(--lbl-weight);
+  background: var(--cream); color: var(--accent);
+  border-radius: 20px; padding: 1px 7px; margin-top: 4px;
+}
+.island-pct.sec { color: var(--muted); }
+.discount-note {
+  margin-top: 12px; padding: 11px 13px; background: var(--surface);
+  border-radius: 10px; font-size: var(--t-sm); color: var(--muted);
+}
+.discount-note strong { color: var(--text); }
+
+/* ── Revenue mix bar rows ── */
+.mix-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--bg); }
+.mix-row:last-child { border-bottom: none; }
+.mix-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.mix-label  { font-size: var(--t-sm); color: var(--text); flex: 1; }
+.mix-bar-bg { width: 90px; height: 5px; background: var(--cream); border-radius: 3px; }
+.mix-bar-fill { height: 100%; border-radius: 3px; }
+.mix-pct    { font-size: var(--t-xs); color: var(--muted); width: 34px; text-align: right; }
+.mix-val    { font-size: var(--t-sm); font-weight: 600; color: var(--text); min-width: 80px; text-align: right; }
+
+/* ── Tables ── */
+.table-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 14px; overflow-x: auto; box-shadow: var(--shadow);
+}
+table { width: 100%; border-collapse: collapse; font-size: var(--t-base); }
+thead tr  { background: var(--text); }
+thead th  {
+  text-align: left; padding: 10px 14px;
+  font-size: var(--t-sm); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase;
+  color: var(--yellow);
+}
+thead th.r, td.r { text-align: right; }
+tbody td  { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+tbody tr:last-child td  { border-bottom: none; }
+tbody tr:hover td       { background: var(--surface); }
+tbody tr.total-row td   { background: var(--surface); font-weight: 700; border-top: 1.5px solid var(--border); }
+td.pos { color: var(--positive); font-weight: 600; }
+td.neg { color: var(--negative); font-weight: 600; }
+td.mt  { color: var(--muted); }
+
+/* Badges / pills */
+.pill {
+  font-size: var(--t-xs); font-weight: var(--lbl-weight);
+  padding: 2px 7px; border-radius: 20px; white-space: nowrap; display: inline-block;
+}
+.pill.up  { background: var(--tint-green); color: var(--positive); }
+.pill.down{ background: var(--tint-red);   color: var(--negative); }
+.pill.neu { background: var(--tint-amber); color: var(--caution); }
+
+/* Spend bars in table */
+.bar-bg   { height: 5px; background: var(--cream); border-radius: 3px; min-width: 50px; }
+.bar-fill { height: 100%; border-radius: 3px; }
+
+/* ── Insights ── */
+.ins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 12px; }
+.ins-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+  box-shadow: var(--shadow); transition: background .15s;
+}
+.ins-card:hover { background: var(--surface); }
+.ins-ico   { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: var(--t-base); flex-shrink: 0; }
+.ins-ico.red   { background: var(--tint-red); }
+.ins-ico.amber { background: var(--tint-amber); }
+.ins-ico.green { background: var(--tint-green); }
+.ins-ico.blue  { background: var(--tint-blue); }
+.ins-body h4   { font-size: var(--t-base); font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.ins-body p    { font-size: var(--t-sm); color: var(--muted); line-height: 1.5; }
+.ins-body p strong { color: var(--text); }
+
+/* ── Chart wrap ── */
+.chart-wrap { position: relative; }
+.chart-wrap canvas { display: block; }
+.chart-note { font-size: var(--t-sm); color: var(--muted); margin-top: 10px; text-align: center; }
+
+/* ── Footer ── */
+footer { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 20px; text-align: center; font-size: var(--t-sm); color: var(--muted); }
+footer span { color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .page-banner { padding: 20px; }
+  .banner-kpis { min-width: auto; }
+  .body-wrap   { padding: 20px 12px 56px; }
+  .banner-title h1 { font-size: var(--t-lg); }
+  .kpi-grid    { grid-template-columns: repeat(2,1fr); }
+  .two-col > * { flex: 1 1 100%; }
+  .three-col   { grid-template-columns: 1fr; }
+  .island-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 420px) {
+  .banner-title h1 { font-size: var(--t-base); }
+  .kpi-grid    { grid-template-columns: 1fr; }
+  .banner-kpis { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-banner">
+  <div class="banner-left">
+    <div class="logo-box">
+      <img src="https://cdn.shopify.com/s/files/1/0964/2498/files/logo-small-white.png?v=1632376865" alt="Sig Zane Designs">
+    </div>
+    <div class="banner-title">
+      <div class="co-name">Kuhao, Inc. dba Sig Zane Designs</div>
+      <h1>Owner's Financial Report</h1>
+      <div class="banner-sub">June 2026 &nbsp;·&nbsp; Year-to-Date January – June 2026 &nbsp;·&nbsp; As of June 24, 2026</div>
+    </div>
+  </div>
+  <div class="banner-kpis">
+    <div class="bkpi">
+      <div class="bkpi-label">YTD Revenue</div>
+      <div class="bkpi-val">$3.19M</div>
+      <div class="bkpi-sub">Jan – Jun 2026</div>
+    </div>
+    <div class="bkpi">
+      <div class="bkpi-label">YTD Net Income</div>
+      <div class="bkpi-val">$156,764</div>
+      <div class="bkpi-sub">4.9% net margin</div>
+    </div>
+    <div class="bkpi">
+      <div class="bkpi-label">June Revenue</div>
+      <div class="bkpi-val">$399,248</div>
+      <div class="bkpi-sub">Month of June</div>
+    </div>
+    <div class="bkpi dark">
+      <div class="bkpi-label">June Net Income</div>
+      <div class="bkpi-val">($70,576)</div>
+      <div class="bkpi-sub">Seasonal loss month</div>
+    </div>
+  </div>
+</div>
+
+<div class="body-wrap">
+
+  <!-- ALERT -->
+  <div style="margin-top:4px">
+    <div class="alert warn">
+      <div class="ai">⚠️</div>
+      <div>
+        <h3>June 2026: Net loss of ($70,576) — typical for the season</h3>
+        <p>June is a historically slow month. Year-to-date net income remains positive at <strong>$156,764</strong>. Hawaii island is driving 60.8% of gross retail revenue ($1.97M YTD).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="sec">
+    <div class="sec-tag">Overview</div>
+    <h2>Key Performance Indicators — June 2026 vs. Year-to-Date</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kc">
+      <div class="kc-lbl">Total Revenue</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val">$399K</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val">$3.19M</div></div>
+      </div>
+    </div>
+    <div class="kc green">
+      <div class="kc-lbl">Gross Profit</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val">$245K</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val">$2.03M</div></div>
+      </div>
+    </div>
+    <div class="kc green">
+      <div class="kc-lbl">Gross Margin %</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val">61.3%</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val">63.7%</div></div>
+      </div>
+    </div>
+    <div class="kc red">
+      <div class="kc-lbl">Net Income</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val neg">($71K)</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val pos">$157K</div></div>
+      </div>
+    </div>
+    <div class="kc yellow">
+      <div class="kc-lbl">Cost of Goods Sold</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val">$154K</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val">$1.16M</div></div>
+      </div>
+    </div>
+    <div class="kc gray">
+      <div class="kc-lbl">Total Expenses</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val">$316K</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val">$1.87M</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE CHARTS -->
+  <div class="sec">
+    <div class="sec-tag">Revenue</div>
+    <h2>Waterfall &amp; Source Mix — YTD Jan–Jun 2026</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Revenue Waterfall — YTD</div>
+      <div class="card-sub">From gross retail sales to net income</div>
+      <div class="chart-wrap"><canvas id="waterfallChart" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue by Source — YTD Jan–Jun 2026</div>
+      <div class="card-sub">$3,185,481 total net revenue</div>
+      <div class="chart-wrap"><canvas id="revMixChart" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ISLAND BREAKDOWN -->
+  <div class="sec">
+    <div class="sec-tag">Islands</div>
+    <h2>Retail Sales by Island — Gross (before discounts/returns)</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-sub">YTD Jan–Jun 2026 &nbsp;·&nbsp; $3,238,562 gross retail &nbsp;·&nbsp; Discounts ($116,302) &nbsp;·&nbsp; Returns ($99,625)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;flex-wrap:wrap">
+      <div><div class="chart-wrap"><canvas id="islandChart" height="240"></canvas></div></div>
+      <div>
+        <div class="island-grid">
+          <div class="island-card">
+            <div class="island-name">Hawaii</div>
+            <div class="island-ytd">$1,974,557</div>
+            <div class="island-jun">Jun: $200,038</div>
+            <div class="island-pct">60.8% YTD</div>
+          </div>
+          <div class="island-card">
+            <div class="island-name">Oahu</div>
+            <div class="island-ytd">$982,737</div>
+            <div class="island-jun">Jun: $135,813</div>
+            <div class="island-pct">30.3% YTD</div>
+          </div>
+          <div class="island-card sec">
+            <div class="island-name">Exempt</div>
+            <div class="island-ytd">$167,261</div>
+            <div class="island-jun">Jun: $32,712</div>
+            <div class="island-pct sec">5.2% YTD</div>
+          </div>
+          <div class="island-card sec">
+            <div class="island-name">Maui</div>
+            <div class="island-ytd">$82,989</div>
+            <div class="island-jun">Jun: $12,310</div>
+            <div class="island-pct sec">2.6% YTD</div>
+          </div>
+          <div class="island-card sec">
+            <div class="island-name">Kauai</div>
+            <div class="island-ytd">$19,919</div>
+            <div class="island-jun">Jun: $2,246</div>
+            <div class="island-pct sec">0.6% YTD</div>
+          </div>
+          <div class="island-card sec">
+            <div class="island-name">Foreign</div>
+            <div class="island-ytd">$11,099</div>
+            <div class="island-jun">Jun: $1,479</div>
+            <div class="island-pct sec">0.3% YTD</div>
+          </div>
+        </div>
+        <div class="discount-note">
+          <strong>Discounts &amp; Returns</strong><br>
+          Discounts: ($116,302) &nbsp;·&nbsp; Returns: ($99,625) &nbsp;·&nbsp; Net after D&amp;R: $3,023,636
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSE CHARTS -->
+  <div class="sec">
+    <div class="sec-tag">Expenses</div>
+    <h2>Operating Expense Breakdown — YTD</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Expense Mix — YTD</div>
+      <div class="card-sub">$1,873,647 total · excludes COGS</div>
+      <div class="chart-wrap"><canvas id="expDonut" height="240"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Categories — YTD vs. June</div>
+      <div class="card-sub">Ranked by YTD spend</div>
+      <div class="chart-wrap"><canvas id="expBar" height="240"></canvas></div>
+    </div>
+  </div>
+
+  <!-- EXPENSE TABLE -->
+  <div class="sec">
+    <div class="sec-tag">Detail</div>
+    <h2>Operating Expense Detail</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="table-card">
+    <div class="card-title" style="margin-bottom:4px">Operating Expense Detail</div>
+    <div class="card-sub">June 2026 and Year-to-Date Jan–Jun 2026 · Sorted by YTD spend</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th class="r">June 2026</th>
+          <th class="r">YTD Jan–Jun</th>
+          <th class="r">June % of YTD</th>
+          <th style="width:100px">Spend (YTD)</th>
+        </tr>
+      </thead>
+      <tbody id="expTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- REVENUE DETAIL TABLE -->
+  <div class="table-card">
+    <div class="card-title" style="margin-bottom:4px">Revenue Detail</div>
+    <div class="card-sub">June 2026 and Year-to-Date Jan–Jun 2026</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th class="r">June 2026</th>
+          <th class="r">YTD Jan–Jun</th>
+          <th class="r">YTD % of Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Gross Retail Sales</td><td class="r">$384,599</td><td class="r">$3,238,562</td><td class="r">101.7%</td></tr>
+        <tr><td style="padding-left:24px" class="mt">— Discounts</td><td class="r neg">($10,700)</td><td class="r neg">($116,302)</td><td class="r mt">−3.7%</td></tr>
+        <tr><td style="padding-left:24px" class="mt">— Returns</td><td class="r neg">($10,042)</td><td class="r neg">($99,625)</td><td class="r mt">−3.1%</td></tr>
+        <tr><td style="padding-left:24px" class="mt">+ Shipping</td><td class="r">$20</td><td class="r">$1,001</td><td class="r mt">0.0%</td></tr>
+        <tr class="total-row"><td style="padding-left:12px">Net Retail Sales</td><td class="r">$363,877</td><td class="r">$3,023,636</td><td class="r">94.9%</td></tr>
+        <tr><td>Wholesale Sales</td><td class="r">$29,483</td><td class="r">$67,770</td><td class="r">2.1%</td></tr>
+        <tr><td>Sales (Gallery, Events, Other)</td><td class="r">$5,888</td><td class="r">$69,430</td><td class="r">2.2%</td></tr>
+        <tr><td>Design Services</td><td class="r mt">$—</td><td class="r">$24,644</td><td class="r">0.8%</td></tr>
+        <tr class="total-row"><td>Total Net Revenue</td><td class="r">$399,248</td><td class="r">$3,185,481</td><td class="r">100%</td></tr>
+        <tr><td>Cost of Goods Sold</td><td class="r neg">($154,312)</td><td class="r neg">($1,155,553)</td><td class="r mt">36.3%</td></tr>
+        <tr class="total-row"><td>Gross Profit</td><td class="r pos">$244,936</td><td class="r pos">$2,029,927</td><td class="r">63.7% margin</td></tr>
+        <tr><td>Total Operating Expenses</td><td class="r neg">($315,517)</td><td class="r neg">($1,873,647)</td><td class="r mt">—</td></tr>
+        <tr><td>Other Income</td><td class="r">$5</td><td class="r">$484</td><td class="r mt">—</td></tr>
+        <tr class="total-row"><td><strong>Net Income</strong></td><td class="r neg">($70,576)</td><td class="r pos">$156,764</td><td class="r mt">4.9% margin</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="sec">
+    <div class="sec-tag">Insights</div>
+    <h2>Key Observations &amp; Action Items</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="ins-grid">
+    <div class="ins-card"><div class="ins-ico green">🌺</div><div class="ins-body"><h4>Hawaii Dominates at 60.8%</h4><p>Hawaii island accounts for <strong>$1,974,557 YTD</strong> in gross retail — over $1M more than Oahu. June alone saw <strong>$200,038</strong>. <strong>Action: Protect and grow this location above all others.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico green">📈</div><div class="ins-body"><h4>Gross Margin Stable at 63.7%</h4><p>Despite June's 38.7% COGS rate, the YTD margin holds at <strong>63.7%</strong>. Watch high-COGS months. <strong>Action: Monitor product mix to sustain 63%+ margin.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">💼</div><div class="ins-body"><h4>Payroll is 41.7% of Operating Expenses</h4><p>Total payroll YTD: <strong>$781,330</strong>, incl. $132,897 officer salaries. June payroll was $131,820 — the single largest monthly expense. <strong>Action: Review staffing against summer revenue.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico red">🏷️</div><div class="ins-body"><h4>GE Tax: $132,848 YTD</h4><p>General Excise Tax is the 3rd-largest expense. June alone was $47,045 — reflecting prior-period truing up. <strong>Action: Confirm quarterly GE filings are reconciled.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico red">📦</div><div class="ins-body"><h4>Outside Services: $108,370 YTD</h4><p>Growing category — June added another $9,012. <strong>Action: Verify scope and ROI of all contractor relationships.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">🎁</div><div class="ins-body"><h4>Promotional Spend: $61,979 YTD</h4><p>Includes <strong>$16,759 charitable contributions</strong>, $35,781 corporate gifts, $7,434 uniforms. <strong>Action: Document giving strategy and track brand impact.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico green">🚢</div><div class="ins-body"><h4>Wholesale Growing: $67,770 YTD</h4><p>June alone was $29,483 — strong trajectory. Lower overhead than retail. <strong>Opportunity: Expand wholesale distribution.</strong></p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">🛒</div><div class="ins-body"><h4>Discounts &amp; Returns: $215,927 YTD</h4><p>Together reduce gross retail by <strong>6.7%</strong>. Hawaii has highest return volume ($72,750). <strong>Action: Review return reasons by location.</strong></p></div></div>
+  </div>
+
+</div><!-- /body-wrap -->
+
+<footer>
+  Prepared for Kuhao, Inc. dba Sig Zane Designs owners &nbsp;·&nbsp; As of <span>June 24, 2026</span> &nbsp;·&nbsp; Confidential &amp; Proprietary
+</footer>
+
+<script>
+/* ── Brand chart defaults ── */
+Chart.defaults.color       = '#5a4a38';
+Chart.defaults.borderColor = '#e0d0b8';
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size   = 11;
+
+var c = {
+  gold:   '#c07d08',
+  yellow: '#e6b800',
+  cream:  '#f0d8a8',
+  deep:   '#a05a08',
+  amber:  '#d4890a',
+  muted:  '#a08868',
+  green:  '#2a7a30',
+  red:    '#c03020',
+  bright: '#f0c830',
+};
+
+/* Waterfall */
+new Chart('waterfallChart', {
+  type: 'bar',
+  data: {
+    labels: ['Gross Retail', 'Discounts &\nReturns', 'Other Revenue', 'Gross Profit', 'Op. Expenses', 'Net Income'],
+    datasets: [{
+      data: [3238562, -215927, 162844, 2029927, -1873647, 156764],
+      backgroundColor: [c.gold, c.red, c.green, c.green, c.red, c.gold],
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => { const v=ctx.parsed.y; return ' '+(v<0?'-$'+Math.abs(v).toLocaleString():'$'+v.toLocaleString()); }}}
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: '#e0d0b8' }, ticks: { callback: v => (v<0?'-$':'$')+Math.abs(v/1000000).toFixed(1)+'M' }}
+    }
+  }
+});
+
+/* Revenue Mix Donut */
+new Chart('revMixChart', {
+  type: 'doughnut',
+  data: {
+    labels: ['Net Retail Sales', 'Wholesale', 'Gallery/Events/Other', 'Design Services'],
+    datasets: [{
+      data: [3023636, 67770, 69430, 24644],
+      backgroundColor: [c.amber, c.gold, c.yellow, c.cream],
+      borderWidth: 2, borderColor: '#fff', hoverOffset: 6,
+    }]
+  },
+  options: {
+    cutout: '62%',
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 }},
+      tooltip: { callbacks: { label: ctx => { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ' $'+ctx.parsed.toLocaleString()+' ('+(ctx.parsed*100/t).toFixed(1)+'%)'; }}}
+    }
+  }
+});
+
+/* Island Bar */
+new Chart('islandChart', {
+  type: 'bar',
+  data: {
+    labels: ["Hawai'i", 'Oahu', 'Exempt', 'Maui', 'Kauai', 'Foreign'],
+    datasets: [
+      { label: 'YTD Jan–Jun', data: [1974557, 982737, 167261, 82989, 19919, 11099], backgroundColor: c.yellow, borderRadius: 4 },
+      { label: 'June Only',   data: [200038, 135813, 32712, 12310, 2246, 1479],     backgroundColor: c.cream,  borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 }},
+      tooltip: { callbacks: { label: ctx => ' $'+ctx.parsed.y.toLocaleString() }}
+    },
+    scales: {
+      x: { grid: { display: false }},
+      y: { grid: { color: '#e0d0b8' }, ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }}
+    }
+  }
+});
+
+/* Expense Donut */
+new Chart('expDonut', {
+  type: 'doughnut',
+  data: {
+    labels: ['Payroll','GE Tax','Insurance','Supplies','Outside Svcs','Rent','Merchant Fees','Travel','Promotional','Postage','Other'],
+    datasets: [{
+      data: [781330, 132848, 121171, 120688, 108370, 95044, 76383, 68861, 61979, 58496, 248477],
+      backgroundColor: [c.amber, c.gold, c.deep, c.yellow, c.orange || '#cc5500', c.bright, c.cream, '#c8b890', '#d8c8a0', '#e0d4b0', '#ede8d0'],
+      borderWidth: 2, borderColor: '#fff', hoverOffset: 5,
+    }]
+  },
+  options: {
+    cutout: '58%',
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 10, padding: 6, font: { size: 10 }}},
+      tooltip: { callbacks: { label: ctx => { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ' $'+ctx.parsed.toLocaleString()+' ('+(ctx.parsed*100/t).toFixed(1)+'%)'; }}}
+    }
+  }
+});
+
+/* Expense Bar (horizontal) */
+new Chart('expBar', {
+  type: 'bar',
+  data: {
+    labels: ['Payroll','GE Tax','Insurance','Supplies','Outside Svcs','Rent','Merch. Fees','Travel'],
+    datasets: [
+      { label: 'YTD',  data: [781330,132848,121171,120688,108370,95044,76383,68861], backgroundColor: c.yellow, borderRadius: 4 },
+      { label: 'June', data: [131820, 47045, 19565,  5580,  9012,15876, 9758,11600], backgroundColor: c.cream,  borderRadius: 4 }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 }},
+      tooltip: { callbacks: { label: ctx => ' $'+ctx.parsed.x.toLocaleString() }}
+    },
+    scales: {
+      x: { grid: { color: '#e0d0b8' }, ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K', font: { size: 10 }}},
+      y: { grid: { display: false }}
+    }
+  }
+});
+
+/* Expense Table */
+const expenses = [
+  { name: 'Payroll (Total)',        jun: 131820, ytd: 781330 },
+  { name: 'Taxes — General Excise', jun: 47045,  ytd: 132848 },
+  { name: 'Insurance Expense',      jun: 19565,  ytd: 121171 },
+  { name: 'Supplies',               jun: 5580,   ytd: 120688 },
+  { name: 'Outside Services',       jun: 9012,   ytd: 108370 },
+  { name: 'Rent (Total)',           jun: 15876,  ytd: 95044  },
+  { name: 'Merchant Account Fees',  jun: 9758,   ytd: 76383  },
+  { name: 'Travel',                 jun: 11600,  ytd: 68861  },
+  { name: 'Promotional Expense',    jun: 6065,   ytd: 61979  },
+  { name: 'Postage Expense',        jun: 11130,  ytd: 58496  },
+  { name: 'Packaging & Gift Wrap',  jun: 0,      ytd: 39098  },
+  { name: 'Dues & Subscriptions',   jun: 6427,   ytd: 35134  },
+  { name: 'Depreciation',           jun: 12065,  ytd: 24130  },
+  { name: 'Legal & Prof. Fees',     jun: 6309,   ytd: 16828  },
+  { name: 'Automobile Expense',     jun: 1662,   ytd: 15635  },
+  { name: 'Utilities',              jun: 2642,   ytd: 13702  },
+  { name: 'Meals & Entertainment',  jun: 7034,   ytd: 13022  },
+  { name: 'Repairs & Maintenance',  jun: 3263,   ytd: 8513   },
+  { name: 'Internet & Computer',    jun: 1911,   ytd: 5501   },
+  { name: 'Interest Expense',       jun: 1277,   ytd: 4974   },
+];
+const maxYTD = expenses[0].ytd;
+const tbody  = document.getElementById('expTableBody');
+expenses.forEach(e => {
+  const pct  = e.ytd > 0 ? ((e.jun / e.ytd) * 100).toFixed(0) : 0;
+  const barW = Math.round((e.ytd / maxYTD) * 100);
+  tbody.innerHTML += `
+    <tr>
+      <td>${e.name}</td>
+      <td class="r">$${e.jun.toLocaleString()}</td>
+      <td class="r">$${e.ytd.toLocaleString()}</td>
+      <td class="r"><span class="pill neu">${pct}%</span></td>
+      <td><div class="bar-bg"><div class="bar-fill" style="width:${barW}%;background:linear-gradient(90deg,var(--gold),var(--yellow))"></div></div></td>
+    </tr>`;
+});
+</script>
+</body>
+</html>

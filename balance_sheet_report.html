@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sig Zane Designs — Owner Financial Report · June 30, 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — single source of truth
+   All colors, sizes, and spacing defined here.
+   Nothing hardcoded anywhere else in this file.
+═══════════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+
+  /* Surface colors */
+  --bg:          #fdf8f0;   /* page background — warm parchment */
+  --card:        #ffffff;   /* card surface */
+  --surface:     #fef6e8;   /* warm amber tint — hover, KPI bg */
+  --cream:       #f5ead8;   /* light cream — progress tracks, section bg */
+  --border:      #e8dcc8;   /* soft tan borders */
+  --chart-grid:  #e0d0b8;   /* chart grid lines */
+
+  /* Brand colors */
+  --header-bg:   #F4A820;   /* golden-orange header */
+  --accent:      #d4890a;   /* amber — primary UI accent */
+  --gold:        #c07d08;   /* deep gold — key values */
+  --yellow:      #e6b800;   /* bright yellow — primary bar chart */
+  --bright-yellow:#f0c830;  /* highlight yellow */
+  --orange:      #cc5500;   /* burnt orange — secondary emphasis */
+  --deep:        #a05a08;   /* deep amber */
+  --dark-brown:  #4a2800;   /* very dark — gradients, dark areas */
+
+  /* Semantic colors */
+  --text:        #2a1f10;   /* primary text — deep brown */
+  --muted:       #7a6a55;   /* secondary text — warm gray */
+  --positive:    #2a7a30;   /* green — gains, upward */
+  --negative:    #c03020;   /* red — losses, downward */
+  --caution:     #b86a08;   /* amber — warnings */
+
+  /* Tinted surfaces (for badges and icon wells) */
+  --tint-red:    #faddda;
+  --tint-green:  #d8f0dc;
+  --tint-amber:  #fdeec8;
+  --tint-blue:   #d8e8ff;
+
+  /* Alert surfaces */
+  --alert-warn-bg:    #fff5f5;
+  --alert-warn-bd:    #f5c0b8;
+  --alert-good-bg:    #f2faf3;
+  --alert-good-bd:    #aaddb5;
+  --alert-text:       #3a2a18;
+
+  /* ── TYPE SCALE (4 steps + display sizes) ── */
+  /* Use ONLY these variables for font-size throughout */
+  --t-xs:   0.68rem;   /* tiny — table sub-rows, change indicators */
+  --t-sm:   0.75rem;   /* labels — section tags, KPI labels, chart labels, headers */
+  --t-base: 0.85rem;   /* body — alerts, metric rows, insight text, table cells */
+  --t-lg:   1.1rem;    /* emphasis — card totals */
+  --t-xl:   1.4rem;    /* banner KPI values */
+  --t-2xl:  1.8rem;    /* main KPI values */
+  --t-3xl:  2.0rem;    /* ratio values */
+  --t-title: 1.65rem;  /* report title h1 */
+
+  /* Consistent label style — always uppercase + tracked */
+  --lbl-weight: 700;
+  --lbl-spacing: 0.06em;
+
+  /* Layout */
+  --radius:  12px;
+  --shadow:  0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--t-base);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+.page-banner {
+  background: var(--header-bg);
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.banner-left    { display: flex; align-items: center; gap: 18px; }
+.logo-box       { width: 90px; height: 64px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-box img   { width: 90px; height: auto; object-fit: contain; }
+.banner-title   { color: #fff; }
+.banner-title .co-name {
+  font-size: var(--t-xs); letter-spacing: 0.15em;
+  text-transform: uppercase; opacity: .85; font-weight: var(--lbl-weight); margin-bottom: 4px;
+}
+.banner-title h1 { font-size: var(--t-title); font-weight: 800; line-height: 1.05; }
+.banner-title .banner-sub { font-size: var(--t-sm); opacity: .8; margin-top: 5px; }
+
+.banner-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 320px; }
+.bkpi        { background: rgba(255,255,255,.22); border-radius: var(--radius); padding: 11px 15px; color: #fff; }
+.bkpi.dark   { background: rgba(0,0,0,.15); }
+.bkpi-label  { font-size: var(--t-xs); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase; opacity: .8; margin-bottom: 4px; }
+.bkpi-val    { font-size: var(--t-xl); font-weight: 800; line-height: 1; }
+.bkpi-sub    { font-size: var(--t-xs); opacity: .75; margin-top: 3px; }
+
+/* ═══════════════════════════════════════════════════
+   BODY
+═══════════════════════════════════════════════════ */
+.body-wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 72px; }
+
+/* ── ALERTS ── */
+.alert {
+  border-radius: var(--radius);
+  padding: 13px 17px;
+  margin-bottom: 11px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.alert.warn { background: var(--alert-warn-bg); border: 1px solid var(--alert-warn-bd); border-left: 3px solid var(--negative); }
+.alert.good { background: var(--alert-good-bg); border: 1px solid var(--alert-good-bd); border-left: 3px solid var(--positive); }
+.alert .ai  { font-size: var(--t-lg); flex-shrink: 0; margin-top: 2px; }
+.alert h3   { font-size: var(--t-base); font-weight: var(--lbl-weight); margin-bottom: 3px; }
+.alert.warn h3 { color: var(--negative); }
+.alert.good h3 { color: var(--positive); }
+.alert p    { color: var(--alert-text); font-size: var(--t-base); }
+
+/* ── SECTION HEADS ── */
+.sec      { display: flex; align-items: center; gap: 10px; margin: 36px 0 15px; }
+.sec-tag  {
+  font-size: var(--t-sm); font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--accent);
+  background: var(--cream); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+}
+.sec h2   { font-size: var(--t-sm); font-weight: 600; color: var(--muted); }
+.sec .rule{ flex: 1; height: 1px; background: var(--border); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.card-lbl {
+  font-size: var(--t-sm); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing);
+  text-transform: uppercase; color: var(--accent); margin-bottom: 13px;
+}
+
+/* ── KPI GRID ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px,1fr)); gap: 11px; }
+.kc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 16px 13px;
+  border-top: 3px solid var(--accent);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.kc.neg { border-top-color: var(--negative); }
+.kc.pos { border-top-color: var(--positive); }
+.kc.cau { border-top-color: var(--caution); }
+.kc-lbl { font-size: var(--t-sm); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.kc-val { font-size: var(--t-2xl); font-weight: 700; color: var(--text); line-height: 1.1; }
+.kc-sub { margin-top: 7px; display: flex; align-items: center; justify-content: center; gap: 5px; flex-wrap: wrap; }
+.kc-sub .st { font-size: var(--t-xs); color: var(--muted); }
+
+/* Badges */
+.bdg {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 2px 7px; border-radius: 20px;
+  font-size: var(--t-xs); font-weight: var(--lbl-weight);
+}
+.bdg.ub, .bdg.db { background: var(--tint-red);   color: var(--negative); }
+.bdg.ug, .bdg.dg { background: var(--tint-green); color: var(--positive); }
+.bdg.nu           { background: var(--cream);      color: var(--muted); }
+
+/* ── TWO-COL ── */
+.two-col      { display: flex; flex-wrap: wrap; gap: 14px; }
+.two-col > *  { flex: 1 1 calc(50% - 7px); min-width: 300px; }
+
+/* ── CASH ── */
+.cash-hd  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px; }
+.cash-tot { font-size: var(--t-lg); font-weight: 700; }
+.ar       { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: var(--t-base); }
+.ar:last-child { border-bottom: none; }
+.ar-name  { flex: 0 0 155px; color: var(--muted); }
+.ar-bw    { flex: 1; height: 4px; background: var(--cream); border-radius: 8px; overflow: hidden; }
+.ar-bf    { height: 100%; background: linear-gradient(90deg, var(--gold), var(--yellow)); border-radius: 8px; }
+.ar-val   { width: 76px; text-align: right; font-weight: 700; }
+.chart-note { font-size: var(--t-sm); color: var(--muted); margin-top: 10px; text-align: center; }
+
+/* ── RATIOS ── */
+.ratio-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.rc       { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; box-shadow: var(--shadow); }
+.rc-lbl   { font-size: var(--t-sm); font-weight: var(--lbl-weight); text-transform: uppercase; letter-spacing: var(--lbl-spacing); color: var(--muted); margin-bottom: 9px; }
+.rc-val   { font-size: var(--t-3xl); font-weight: 700; line-height: 1; }
+.rc-val.g { color: var(--positive); }
+.rc-val.w { color: var(--caution); }
+.rc-val.b { color: var(--negative); }
+.rc-desc  { font-size: var(--t-sm); color: var(--muted); margin-top: 7px; line-height: 1.4; }
+.rc-yoy   { margin-top: 9px; display: flex; justify-content: center; }
+
+/* ── CHARTS ── */
+.chart-wrap { position: relative; height: 210px; }
+.ch-lbl { font-size: var(--t-sm); font-weight: var(--lbl-weight); text-transform: uppercase; letter-spacing: var(--lbl-spacing); color: var(--muted); margin-bottom: 12px; }
+
+/* ── INVENTORY ── */
+.inv-hd {
+  background: linear-gradient(135deg, var(--text), var(--dark-brown));
+  margin: -20px -20px 14px; padding: 13px 20px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.inv-hd-lbl { font-size: var(--t-sm); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase; color: var(--yellow); }
+.inv-hd-tot { font-size: var(--t-lg); font-weight: 700; color: var(--card); }
+.ir       { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: var(--t-base); }
+.ir:last-child { border-bottom: none; }
+.ir-nm    { flex: 0 0 124px; color: var(--muted); }
+.ir-bw    { flex: 1; height: 4px; background: var(--cream); border-radius: 8px; overflow: hidden; }
+.ir-bf    { height: 100%; background: linear-gradient(90deg, var(--gold), var(--yellow)); border-radius: 8px; }
+.ir-val   { width: 80px; text-align: right; font-weight: 700; }
+.ir-chg   { width: 58px; text-align: right; font-size: var(--t-xs); }
+
+/* ── INSIGHTS ── */
+.ins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 12px; }
+.ins-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+  box-shadow: var(--shadow); transition: background .15s;
+}
+.ins-card:hover { background: var(--surface); }
+.ins-ico  { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: var(--t-base); flex-shrink: 0; }
+.ins-ico.red   { background: var(--tint-red); }
+.ins-ico.amber { background: var(--tint-amber); }
+.ins-ico.green { background: var(--tint-green); }
+.ins-ico.blue  { background: var(--tint-blue); }
+.ins-body h4   { font-size: var(--t-base); font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.ins-body p    { font-size: var(--t-sm); color: var(--muted); line-height: 1.5; }
+.ins-body p strong { color: var(--text); }
+
+/* ── TABLE ── */
+.bs-wrap  { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.bs-table { width: 100%; border-collapse: collapse; font-size: var(--t-base); }
+.bs-table thead tr { background: var(--text); }
+.bs-table thead th {
+  padding: 10px 14px; text-align: left;
+  color: var(--yellow); font-size: var(--t-sm); font-weight: var(--lbl-weight); letter-spacing: var(--lbl-spacing); text-transform: uppercase;
+}
+.bs-table thead th:not(:first-child) { text-align: right; }
+.bs-table tbody tr  { border-bottom: 1px solid var(--border); }
+.bs-table tbody tr:last-child { border-bottom: none; }
+.bs-table tbody tr:hover { background: var(--surface); }
+.bs-table td { padding: 8px 14px; }
+.bs-table td:not(:first-child) { text-align: right; }
+.bs-table .rs td { background: var(--cream); font-weight: 700; color: var(--deep); font-size: var(--t-sm); letter-spacing: var(--lbl-spacing); text-transform: uppercase; padding: 6px 14px; }
+.bs-table .rt td { background: var(--surface); font-weight: 700; border-top: 1.5px solid var(--border); }
+.bs-sub td { font-size: var(--t-xs); color: var(--muted); padding-left: 40px !important; }
+.pt { color: var(--positive); font-weight: 700; }
+.nt { color: var(--negative); font-weight: 700; }
+.mt { color: var(--muted); }
+
+/* ── FOOTER ── */
+footer { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 20px; text-align: center; font-size: var(--t-sm); color: var(--muted); }
+footer span { color: var(--accent); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .page-banner { padding: 20px; }
+  .banner-kpis { min-width: auto; }
+  .body-wrap   { padding: 20px 12px 56px; }
+  .banner-title h1 { font-size: var(--t-lg); }
+  .kpi-grid    { grid-template-columns: repeat(2,1fr); }
+  .ratio-grid  { grid-template-columns: 1fr; }
+  .two-col > * { flex: 1 1 100%; }
+  .chart-wrap  { height: 200px; }
+  .ins-grid    { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .banner-title h1 { font-size: var(--t-base); }
+  .chart-wrap      { height: 170px; }
+  .kpi-grid        { grid-template-columns: 1fr; }
+  .banner-kpis     { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-banner">
+  <div class="banner-left">
+    <div class="logo-box">
+      <img src="https://cdn.shopify.com/s/files/1/0964/2498/files/logo-small-white.png?v=1632376865" alt="Sig Zane Designs">
+    </div>
+    <div class="banner-title">
+      <div class="co-name">Kuhao, Inc. dba Sig Zane Designs</div>
+      <h1>Owner's Financial Report</h1>
+      <div class="banner-sub">June 2026 &nbsp;·&nbsp; Month-over-Month vs. May 31, 2026 &nbsp;·&nbsp; As of June 30, 2026</div>
+    </div>
+  </div>
+  <div class="banner-kpis">
+    <div class="bkpi">
+      <div class="bkpi-label">Total Assets</div>
+      <div class="bkpi-val">$2.65M</div>
+      <div class="bkpi-sub">As of Jun 30, 2026</div>
+    </div>
+    <div class="bkpi">
+      <div class="bkpi-label">Total Equity</div>
+      <div class="bkpi-val">$1.93M</div>
+      <div class="bkpi-sub">−$72K from May</div>
+    </div>
+    <div class="bkpi">
+      <div class="bkpi-label">Cash Position</div>
+      <div class="bkpi-val">$294K</div>
+      <div class="bkpi-sub">Across all accounts</div>
+    </div>
+    <div class="bkpi dark">
+      <div class="bkpi-label">Net Income YTD</div>
+      <div class="bkpi-val">$156,764</div>
+      <div class="bkpi-sub">−$70K from May</div>
+    </div>
+  </div>
+</div>
+
+<div class="body-wrap">
+
+  <!-- ALERTS -->
+  <div style="margin-top:4px">
+    <div class="alert warn">
+      <div class="ai">⚠️</div>
+      <div>
+        <h3>June 2026: Net income down $70,576 (−31%) from May</h3>
+        <p>YTD net income fell from <strong>$227,340 to $156,764</strong>. Accounts payable surged <strong>$28K (+20%)</strong> and the quick ratio dipped below 1.0. Monitor AP timing against incoming cash over the next 30 days.</p>
+      </div>
+    </div>
+    <div class="alert good">
+      <div class="ai">✅</div>
+      <div>
+        <h3>Strong collections &amp; inventory corrections resolved</h3>
+        <p>AR fell <strong>$27,598 (−19%)</strong> — excellent collections month. Both Kaiao and Production negative inventory balances are fully corrected. Balance sheet remains well-capitalized at <strong>$2.65M</strong> with a 4.37× current ratio.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI SNAPSHOT -->
+  <div class="sec">
+    <div class="sec-tag">Overview</div>
+    <h2>Key Performance Indicators — June vs. May</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kc">
+      <div class="kc-lbl">Total Assets</div>
+      <div class="kc-val">$2.65M</div>
+      <div class="kc-sub"><span class="bdg db">▼ −2.0%</span><span class="st">vs $2.70M May</span></div>
+    </div>
+    <div class="kc pos">
+      <div class="kc-lbl">Total Equity</div>
+      <div class="kc-val">$1.93M</div>
+      <div class="kc-sub"><span class="bdg db">▼ −3.6%</span><span class="st">vs $2.00M May</span></div>
+    </div>
+    <div class="kc neg">
+      <div class="kc-lbl">Net Income (YTD)</div>
+      <div class="kc-val">$157K</div>
+      <div class="kc-sub"><span class="bdg db">▼ −31.0%</span><span class="st">vs $227K May</span></div>
+    </div>
+    <div class="kc cau">
+      <div class="kc-lbl">Cash Position</div>
+      <div class="kc-val">$294K</div>
+      <div class="kc-sub"><span class="bdg db">▼ −5.8%</span><span class="st">vs $312K May</span></div>
+    </div>
+    <div class="kc pos">
+      <div class="kc-lbl">Accounts Receivable</div>
+      <div class="kc-val">$115K</div>
+      <div class="kc-sub"><span class="bdg dg">▼ −19.4%</span><span class="st">vs $142K May</span></div>
+    </div>
+    <div class="kc neg">
+      <div class="kc-lbl">Accounts Payable</div>
+      <div class="kc-val">$167K</div>
+      <div class="kc-sub"><span class="bdg ub">▲ +20.4%</span><span class="st">vs $139K May</span></div>
+    </div>
+    <div class="kc">
+      <div class="kc-lbl">Total Inventory</div>
+      <div class="kc-val">$1.12M</div>
+      <div class="kc-sub"><span class="bdg nu">▼ −0.2%</span><span class="st">essentially flat</span></div>
+    </div>
+    <div class="kc">
+      <div class="kc-lbl">Line of Credit</div>
+      <div class="kc-val">$144K</div>
+      <div class="kc-sub"><span class="bdg dg">▼ −2.0%</span><span class="st">vs $147K May</span></div>
+    </div>
+  </div>
+
+  <!-- CASH -->
+  <div class="sec">
+    <div class="sec-tag">Cash</div>
+    <h2>Cash Position — Account Breakdown</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="cash-hd">
+        <div class="card-lbl">Jun 30, 2026 — All Accounts</div>
+        <div class="cash-tot">$294,196</div>
+      </div>
+      <div class="ar"><span class="ar-name">HNB Checking x0980</span><div class="ar-bw"><div class="ar-bf" style="width:100%"></div></div><span class="ar-val">$107,836</span></div>
+      <div class="ar"><span class="ar-name">FHB Checking</span><div class="ar-bw"><div class="ar-bf" style="width:76%"></div></div><span class="ar-val">$82,140</span></div>
+      <div class="ar"><span class="ar-name">Ramp Checking</span><div class="ar-bw"><div class="ar-bf" style="width:38%"></div></div><span class="ar-val">$40,851</span></div>
+      <div class="ar"><span class="ar-name">ASB Checking</span><div class="ar-bw"><div class="ar-bf" style="width:35%"></div></div><span class="ar-val">$37,689</span></div>
+      <div class="ar"><span class="ar-name">HNB Checking–Kaiao</span><div class="ar-bw"><div class="ar-bf" style="width:11%"></div></div><span class="ar-val">$11,875</span></div>
+      <div class="ar"><span class="ar-name">CPB Checking</span><div class="ar-bw"><div class="ar-bf" style="width:11%"></div></div><span class="ar-val">$11,572</span></div>
+      <div class="ar"><span class="ar-name">Homestreet Savings</span><div class="ar-bw"><div class="ar-bf" style="width:1%"></div></div><span class="ar-val">$1,003</span></div>
+      <div class="ar"><span class="ar-name">Change Fund</span><div class="ar-bw"><div class="ar-bf" style="width:1%"></div></div><span class="ar-val">$1,230</span></div>
+    </div>
+    <div class="card">
+      <div class="ch-lbl">Cash vs. Line of Credit — Month over Month</div>
+      <div class="chart-wrap"><canvas id="cashChart"></canvas></div>
+      <p class="chart-note">Net cushion (Cash − LOC): Jun $150K · May $165K</p>
+    </div>
+  </div>
+
+  <!-- RATIOS -->
+  <div class="sec">
+    <div class="sec-tag">Ratios</div>
+    <h2>Liquidity &amp; Solvency</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="ratio-grid">
+    <div class="rc">
+      <div class="rc-lbl">Current Ratio</div>
+      <div class="rc-val g">4.37×</div>
+      <div class="rc-desc">Current Assets ÷ Current Liabilities<br>Healthy benchmark ≥ 2.0</div>
+      <div class="rc-yoy"><span class="bdg db">▼ was 4.68× in May</span></div>
+    </div>
+    <div class="rc">
+      <div class="rc-lbl">Quick Ratio</div>
+      <div class="rc-val w">0.94×</div>
+      <div class="rc-desc">(Cash + AR) ÷ Current Liabilities<br>Dipped below 1.0 — watch AP timing</div>
+      <div class="rc-yoy"><span class="bdg db">▼ was 1.09× in May</span></div>
+    </div>
+    <div class="rc">
+      <div class="rc-lbl">Debt-to-Equity</div>
+      <div class="rc-val w">0.37</div>
+      <div class="rc-desc">Total Liabilities ÷ Total Equity<br>Manageable; trending up</div>
+      <div class="rc-yoy"><span class="bdg ub">▲ was 0.35 in May</span></div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="sec">
+    <div class="sec-tag">Trends</div>
+    <h2>Balance Sheet &amp; Income — May vs. June</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="ch-lbl">Assets, Liabilities &amp; Equity</div>
+      <div class="chart-wrap"><canvas id="balanceChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ch-lbl">Net Income (YTD) vs. Shareholder Distributions</div>
+      <div class="chart-wrap"><canvas id="incomeChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="sec">
+    <div class="sec-tag">Inventory</div>
+    <h2>Finished Goods by Location</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="inv-hd">
+        <div class="inv-hd-lbl">Finished Goods — Jun 30, 2026</div>
+        <div class="inv-hd-tot">$879,682</div>
+      </div>
+      <div class="ir"><span class="ir-nm">Hilo – Store</span><div class="ir-bw"><div class="ir-bf" style="width:100%"></div></div><span class="ir-val">$361,652</span><span class="ir-chg pt">+$14,930</span></div>
+      <div class="ir"><span class="ir-nm">Hilo – Web</span><div class="ir-bw"><div class="ir-bf" style="width:72%"></div></div><span class="ir-val">$259,616</span><span class="ir-chg pt">+$9,540</span></div>
+      <div class="ir"><span class="ir-nm">Sig On Smith</span><div class="ir-bw"><div class="ir-bf" style="width:40%"></div></div><span class="ir-val">$145,835</span><span class="ir-chg pt">+$14,018</span></div>
+      <div class="ir"><span class="ir-nm">Paliku</span><div class="ir-bw"><div class="ir-bf" style="width:14%"></div></div><span class="ir-val">$52,097</span><span class="ir-chg pt">+$2,188</span></div>
+      <div class="ir"><span class="ir-nm">Pop Up</span><div class="ir-bw"><div class="ir-bf" style="width:12%"></div></div><span class="ir-val">$42,125</span><span class="ir-chg pt">+$3,792</span></div>
+      <div class="ir"><span class="ir-nm">Kaiao</span><div class="ir-bw"><div class="ir-bf" style="width:4%"></div></div><span class="ir-val">$14,287</span><span class="ir-chg pt">+$1,322</span></div>
+      <div class="ir"><span class="ir-nm">Production</span><div class="ir-bw"><div class="ir-bf" style="width:1%"></div></div><span class="ir-val">$2,613</span><span class="ir-chg pt">✓ Fixed</span></div>
+      <div class="ir"><span class="ir-nm">Wailoa</span><div class="ir-bw"><div class="ir-bf" style="width:0%"></div></div><span class="ir-val">$414</span><span class="ir-chg nt">−$3,484</span></div>
+    </div>
+    <div class="card">
+      <div class="ch-lbl">Inventory Mix — Finished vs. Raw Goods</div>
+      <div class="chart-wrap"><canvas id="invChart"></canvas></div>
+      <p class="chart-note">Raw goods fell $49K (−17%) — being converted to finished product.</p>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="sec">
+    <div class="sec-tag">Insights</div>
+    <h2>Key Observations for Owners</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="ins-grid">
+    <div class="ins-card"><div class="ins-ico red">📉</div><div class="ins-body"><h4>Net Income Down $70K Month-over-Month</h4><p>YTD net income dropped from <strong>$227,340 to $156,764</strong>. Review June expenses — payroll, COGS, and one-time items — before month-end close.</p></div></div>
+    <div class="ins-card"><div class="ins-ico red">⚡</div><div class="ins-body"><h4>Quick Ratio Fell Below 1.0</h4><p>At <strong>0.94×</strong>, liquid assets no longer fully cover current liabilities. AP jumped to $167K. Schedule vendor payments carefully against incoming cash.</p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">💳</div><div class="ins-body"><h4>Accounts Payable Up $28K (+20%)</h4><p>AP grew from <strong>$138,937 to $167,241</strong>. Confirm due dates and stagger outflows to protect cash position while AR collections continue.</p></div></div>
+    <div class="ins-card"><div class="ins-ico green">📬</div><div class="ins-body"><h4>Collections Excellent — AR Down 19%</h4><p>AR dropped from <strong>$142,322 to $114,724</strong>. Outstanding invoices collected efficiently. Continue the current cadence into July.</p></div></div>
+    <div class="ins-card"><div class="ins-ico green">✅</div><div class="ins-body"><h4>Inventory Accounting Corrected</h4><p>Kaiao recovered from <strong>($23,315) → +$14,287</strong> and Production from <strong>($825) → +$2,613</strong>. Both negatives fully resolved.</p></div></div>
+    <div class="ins-card"><div class="ins-ico blue">📦</div><div class="ins-body"><h4>Raw Goods Flowing Into Production</h4><p>Raw goods fell <strong>$49K (−17%)</strong> while finished goods rose <strong>$47K (+6%)</strong>. Fabric is converting to sellable product across all locations.</p></div></div>
+    <div class="ins-card"><div class="ins-ico blue">🏬</div><div class="ins-body"><h4>All Retail Locations Building Inventory</h4><p>Hilo Store, Hilo Web, Sig On Smith, and Paliku all increased month-over-month — looks like Q3 stocking has begun.</p></div></div>
+    <div class="ins-card"><div class="ins-ico green">🏦</div><div class="ins-body"><h4>Line of Credit Slightly Reduced</h4><p>LOC fell from <strong>$147,000 to $144,060</strong>. Net liquid cushion (Cash − LOC) is <strong>$150,136</strong>, down from $165,442 in May but still healthy.</p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">📋</div><div class="ins-body"><h4>KU'ILUA LLC Investment Growing</h4><p>Balance grew from <strong>$169,799 to $177,109</strong> (+$7,310). The subsidiary generated equity income this period — a positive signal.</p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">🎁</div><div class="ins-body"><h4>Gift Certificate Liability Edging Up</h4><p>Outstanding GCs grew to <strong>$171,262</strong> (+$2,159). A spike in redemptions could compress revenue — worth monitoring.</p></div></div>
+    <div class="ins-card"><div class="ins-ico amber">👤</div><div class="ins-body"><h4>Employee Advances Slightly Up</h4><p>Kuha'o Zane's advance grew to <strong>$54,982</strong> (+$670). Total advances $81,913 — assets on the books but cash outside the business.</p></div></div>
+    <div class="ins-card"><div class="ins-ico green">💪</div><div class="ins-body"><h4>Strong Asset Base Remains Intact</h4><p>Total assets: <strong>$2.65M</strong>. Total equity: <strong>$1.93M</strong>. Current ratio: <strong>4.37×</strong>. Challenges are income-side and timing — the foundation is solid.</p></div></div>
+  </div>
+
+  <!-- BALANCE SHEET TABLE -->
+  <div class="sec">
+    <div class="sec-tag">Detail</div>
+    <h2>Condensed Balance Sheet</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="bs-wrap">
+    <table class="bs-table">
+      <thead>
+        <tr>
+          <th>Line Item</th>
+          <th>Jun 30, 2026</th>
+          <th>May 31, 2026</th>
+          <th>$ Change</th>
+          <th>% Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rs"><td colspan="5">ASSETS</td></tr>
+        <tr><td style="padding-left:22px">Total Cash &amp; Savings</td><td>$294,196</td><td>$312,442</td><td class="nt">($18,246)</td><td class="nt">−5.8%</td></tr>
+        <tr><td style="padding-left:22px">Accounts Receivable</td><td>$114,724</td><td>$142,322</td><td class="pt">($27,598)</td><td class="pt">−19.4%</td></tr>
+        <tr><td style="padding-left:22px">Inventory — Total</td><td>$1,115,253</td><td>$1,116,981</td><td class="mt">($1,728)</td><td class="mt">−0.2%</td></tr>
+        <tr class="bs-sub"><td>→ Finished Goods</td><td>$879,682</td><td>$832,392</td><td>+$47,290</td><td>+5.7%</td></tr>
+        <tr class="bs-sub"><td>→ Raw Goods</td><td>$235,571</td><td>$284,589</td><td>($49,018)</td><td>−17.2%</td></tr>
+        <tr><td style="padding-left:22px">Employee Advances</td><td>$81,913</td><td>$81,244</td><td class="mt">+$669</td><td class="mt">+0.8%</td></tr>
+        <tr><td style="padding-left:22px">Prepaid &amp; Other CA</td><td>$291,589</td><td>$292,904</td><td class="mt">($1,315)</td><td class="mt">−0.4%</td></tr>
+        <tr class="rt"><td>Total Current Assets</td><td>$1,897,814</td><td>$1,947,893</td><td class="nt">($50,079)</td><td class="nt">−2.6%</td></tr>
+        <tr><td style="padding-left:22px">Net Fixed Assets</td><td>$429,527</td><td>$441,592</td><td class="nt">($12,065)</td><td class="nt">−2.7%</td></tr>
+        <tr><td style="padding-left:22px">Other Assets (Investments, Deposits)</td><td>$319,004</td><td>$311,701</td><td class="pt">+$7,303</td><td class="pt">+2.3%</td></tr>
+        <tr class="rt"><td><strong>TOTAL ASSETS</strong></td><td><strong>$2,646,346</strong></td><td><strong>$2,701,186</strong></td><td class="nt"><strong>($54,840)</strong></td><td class="nt"><strong>−2.0%</strong></td></tr>
+
+        <tr class="rs"><td colspan="5">LIABILITIES</td></tr>
+        <tr><td style="padding-left:22px">Accounts Payable</td><td>$167,241</td><td>$138,937</td><td class="nt">+$28,304</td><td class="nt">+20.4%</td></tr>
+        <tr><td style="padding-left:22px">Credit Cards</td><td>$25,744</td><td>$31,875</td><td class="pt">($6,131)</td><td class="pt">−19.2%</td></tr>
+        <tr><td style="padding-left:22px">Accrued Payroll</td><td>$75,110</td><td>$75,584</td><td class="mt">($474)</td><td class="mt">−0.6%</td></tr>
+        <tr><td style="padding-left:22px">Line of Credit</td><td>$144,060</td><td>$147,000</td><td class="pt">($2,940)</td><td class="pt">−2.0%</td></tr>
+        <tr class="rt"><td>Total Current Liabilities</td><td>$434,244</td><td>$416,137</td><td class="nt">+$18,107</td><td class="nt">+4.4%</td></tr>
+        <tr><td style="padding-left:22px">Long-Term Notes Payable</td><td>$109,653</td><td>$112,077</td><td class="pt">($2,424)</td><td class="pt">−2.2%</td></tr>
+        <tr><td style="padding-left:22px">Gift Certificate Liability</td><td>$171,262</td><td>$169,103</td><td class="nt">+$2,159</td><td class="nt">+1.3%</td></tr>
+        <tr class="rt"><td><strong>TOTAL LIABILITIES</strong></td><td><strong>$715,158</strong></td><td><strong>$697,317</strong></td><td class="nt"><strong>+$17,841</strong></td><td class="nt"><strong>+2.6%</strong></td></tr>
+
+        <tr class="rs"><td colspan="5">EQUITY</td></tr>
+        <tr><td style="padding-left:22px">Retained Earnings</td><td>$2,266,717</td><td>$2,266,717</td><td class="mt">—</td><td class="mt">0.0%</td></tr>
+        <tr><td style="padding-left:22px">Net Income (YTD)</td><td>$156,764</td><td>$227,340</td><td class="nt">($70,576)</td><td class="nt">−31.0%</td></tr>
+        <tr><td style="padding-left:22px">Shareholder Distributions</td><td>($463,978)</td><td>($461,872)</td><td class="nt">($2,106)</td><td class="nt">+0.5%</td></tr>
+        <tr><td style="padding-left:22px">Capital Stock &amp; Other</td><td>($28,316)</td><td>($28,316)</td><td class="mt">—</td><td class="mt">0.0%</td></tr>
+        <tr class="rt"><td><strong>TOTAL EQUITY</strong></td><td><strong>$1,931,187</strong></td><td><strong>$2,003,869</strong></td><td class="nt"><strong>($72,682)</strong></td><td class="nt"><strong>−3.6%</strong></td></tr>
+        <tr class="rt"><td><strong>TOTAL LIABILITIES &amp; EQUITY</strong></td><td><strong>$2,646,346</strong></td><td><strong>$2,701,186</strong></td><td class="nt"><strong>($54,840)</strong></td><td class="nt"><strong>−2.0%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /body-wrap -->
+
+<footer>
+  Prepared for Kuhao, Inc. dba Sig Zane Designs owners &nbsp;·&nbsp; As of <span>June 30, 2026</span> &nbsp;·&nbsp; Confidential &amp; Proprietary
+</footer>
+
+<script>
+  /* Brand chart defaults */
+  Chart.defaults.color        = '#5a4a38';
+  Chart.defaults.borderColor  = '#e0d0b8';
+  Chart.defaults.font.family  = "'Segoe UI', system-ui, sans-serif";
+  Chart.defaults.font.size    = 11;
+
+  var c = {
+    gold:   '#c07d08',
+    yellow: '#e6b800',
+    cream:  '#f0d8a8',
+    deep:   '#a05a08',
+    amber:  '#d4890a',
+    muted:  '#a08868',
+    green:  '#2a7a30',
+    red:    '#c03020',
+  };
+
+  var opts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } },
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString() } }
+    },
+    scales: {
+      y: { grid: { color: '#e0d0b8' }, ticks: { font: { size: 11 } } },
+      x: { grid: { display: false },   ticks: { font: { size: 11 } } }
+    }
+  };
+
+  function barOpts(yFmt) {
+    var o = JSON.parse(JSON.stringify(opts));
+    o.scales.y.ticks.callback = yFmt;
+    return o;
+  }
+
+  /* Cash vs LOC */
+  new Chart('cashChart', {
+    type: 'bar',
+    data: {
+      labels: ['May 31, 2026', 'Jun 30, 2026'],
+      datasets: [
+        { label: 'Cash',           data: [312442, 294196], backgroundColor: [c.cream, c.yellow], borderRadius: 4 },
+        { label: 'Line of Credit', data: [147000, 144060], backgroundColor: [c.red+'66', c.red+'aa'], borderRadius: 4 },
+      ]
+    },
+    options: barOpts(v => '$' + (v/1000).toFixed(0) + 'K')
+  });
+
+  /* Balance Sheet */
+  new Chart('balanceChart', {
+    type: 'bar',
+    data: {
+      labels: ['May 31, 2026', 'Jun 30, 2026'],
+      datasets: [
+        { label: 'Total Assets',      data: [2701186, 2646346], backgroundColor: [c.cream, c.yellow],         borderRadius: 4 },
+        { label: 'Total Liabilities', data: [697317,  715158],  backgroundColor: [c.red+'66', c.red+'aa'],    borderRadius: 4 },
+        { label: 'Total Equity',      data: [2003869, 1931187], backgroundColor: [c.green+'66', c.green+'aa'], borderRadius: 4 },
+      ]
+    },
+    options: barOpts(v => '$' + (v/1000000).toFixed(2) + 'M')
+  });
+
+  /* Income vs Distributions */
+  new Chart('incomeChart', {
+    type: 'bar',
+    data: {
+      labels: ['May 31, 2026', 'Jun 30, 2026'],
+      datasets: [
+        { label: 'Net Income (YTD)',     data: [227340, 156764], backgroundColor: [c.green+'66', c.green+'aa'], borderRadius: 4 },
+        { label: 'Distributions (YTD)', data: [461872, 463978], backgroundColor: [c.red+'66', c.red+'aa'],    borderRadius: 4 },
+      ]
+    },
+    options: barOpts(v => '$' + (v/1000).toFixed(0) + 'K')
+  });
+
+  /* Inventory donut */
+  new Chart('invChart', {
+    type: 'doughnut',
+    data: {
+      labels: ['Hilo Store', 'Hilo Web', 'Sig On Smith', 'Raw Goods', 'Paliku', 'Pop Up', 'Other'],
+      datasets: [{
+        data: [361652, 259616, 145835, 235571, 52097, 42125, 18886],
+        backgroundColor: [c.gold, c.yellow, c.amber, c.deep, c.cream, '#f0c830', '#e0d0b8'],
+        borderWidth: 2, borderColor: '#fff', hoverOffset: 7,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString() } }
+      }
+    }
+  });
+</script>
+</body>
+</html>
