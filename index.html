@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sig Zane Designs — Owner Reports</title>
+<title>Sig Zane Designs — Dashboards</title>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -18,13 +18,10 @@
     --accent:    #d4890a;
     --gold:      #c07d08;
     --yellow:    #e6b800;
-    --positive:  #2a7a30;
-    --negative:  #c03020;
     --t-xs:   0.68rem;
     --t-sm:   0.75rem;
     --t-base: 0.85rem;
     --t-lg:   1.1rem;
-    --t-xl:   1.4rem;
     --t-title:1.65rem;
     --radius: 12px;
     --shadow: 0 1px 3px rgba(0,0,0,.06);
@@ -37,7 +34,7 @@
     min-height:100vh;
   }
 
-  /* ── Header ── */
+  /* Header */
   .page-banner{
     background:var(--header-bg);
     padding:28px 40px;
@@ -52,29 +49,33 @@
   .banner-title h1{font-size:var(--t-title);font-weight:800;line-height:1.05;}
   .banner-title .banner-sub{font-size:var(--t-sm);opacity:.8;margin-top:5px;}
 
-  /* ── Body ── */
-  .body-wrap{max-width:820px;margin:0 auto;padding:48px 24px 80px;}
+  /* Body */
+  .body-wrap{max-width:900px;margin:0 auto;padding:48px 24px 80px;}
 
-  .intro{
-    text-align:center;
-    margin-bottom:44px;
+  /* Section labels */
+  .section-label{
+    font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:14px;padding-bottom:8px;
+    border-bottom:1px solid var(--border);
   }
-  .intro h2{font-size:var(--t-lg);font-weight:700;color:var(--text);margin-bottom:8px;}
-  .intro p{font-size:var(--t-sm);color:var(--muted);line-height:1.6;max-width:500px;margin:0 auto;}
+  .section-group{margin-bottom:36px;}
 
-  /* ── Report cards ── */
-  .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-  @media(max-width:580px){.report-grid{grid-template-columns:1fr;}}
+  /* Grid */
+  .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:600px){.report-grid{grid-template-columns:1fr;}}
 
+  /* Cards */
   .report-card{
     background:var(--card);
     border:1px solid var(--border);
     border-radius:var(--radius);
-    padding:28px 24px;
+    padding:24px;
     box-shadow:var(--shadow);
     text-decoration:none;
     color:inherit;
-    display:block;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
     transition:box-shadow .15s, transform .15s;
     position:relative;
     overflow:hidden;
@@ -83,47 +84,37 @@
     content:'';
     position:absolute;
     top:0;left:0;right:0;
-    height:4px;
+    height:3px;
     background:linear-gradient(90deg, var(--gold), var(--yellow));
   }
   .report-card:hover{
     box-shadow:0 8px 28px rgba(42,31,16,.12);
     transform:translateY(-2px);
   }
-  .report-card .rc-icon{
-    width:48px;height:48px;
-    border-radius:10px;
-    background:var(--surface);
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.4rem;
-    margin-bottom:16px;
-  }
-  .report-card h3{font-size:var(--t-lg);font-weight:700;color:var(--text);margin-bottom:6px;}
-  .report-card .rc-desc{font-size:var(--t-sm);color:var(--muted);line-height:1.55;margin-bottom:20px;}
-  .report-card .rc-meta{
-    display:flex;flex-wrap:wrap;gap:8px;
-    margin-bottom:24px;
-  }
+  .rc-title{font-size:var(--t-lg);font-weight:700;color:var(--text);}
+  .rc-meta{display:flex;flex-wrap:wrap;gap:6px;}
   .tag{
     font-size:var(--t-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;
-    padding:3px 9px;border-radius:20px;
+    padding:2px 8px;border-radius:20px;
     background:var(--cream);color:var(--accent);
     border:1px solid var(--border);
   }
-  .btn{
-    display:inline-flex;align-items:center;gap:7px;
+  .rc-btn{
+    display:inline-flex;align-items:center;gap:6px;
     background:var(--header-bg);
     color:#fff;
-    padding:10px 18px;
+    padding:9px 16px;
     border-radius:8px;
     font-size:var(--t-sm);font-weight:700;
     text-decoration:none;
     transition:opacity .15s;
+    align-self:flex-start;
+    margin-top:auto;
   }
-  .btn:hover{opacity:.9;}
-  .btn svg{width:14px;height:14px;fill:currentColor;}
+  .rc-btn:hover{opacity:.88;}
+  .rc-btn svg{width:13px;height:13px;fill:currentColor;flex-shrink:0;}
 
-  /* ── Footer ── */
+  /* Footer */
   footer{
     margin-top:48px;
     border-top:1px solid var(--border);
@@ -143,61 +134,48 @@
   </div>
   <div class="banner-title">
     <div class="co-name">Kuhao, Inc. dba Sig Zane Designs</div>
-    <h1>Owner Reports</h1>
-    <div class="banner-sub">June 2026 &nbsp;·&nbsp; Confidential</div>
+    <h1>Dashboards</h1>
+    <div class="banner-sub">Confidential</div>
   </div>
 </div>
 
 <div class="body-wrap">
 
-  <div class="intro">
-    <h2>Financial Reports — June 2026</h2>
-    <p>Select a report below. Each report requires a password to view.</p>
-  </div>
+  <div class="section-group">
+    <div class="report-grid">
 
-  <div class="report-grid">
+      <a class="report-card" href="bs_report_protected.html">
+        <div class="rc-title">Balance Sheet</div>
+        <div class="rc-meta">
+          <span class="tag">Jun 30, 2026</span>
+          <span class="tag">vs May 2026</span>
+        </div>
+        <span class="rc-btn">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z"/></svg>
+          View Report
+        </span>
+      </a>
 
-    <!-- Balance Sheet -->
-    <a class="report-card" href="bs_report_protected.html">
+      <a class="report-card" href="pl_report_protected.html">
+        <div class="rc-title">Profit &amp; Loss</div>
+        <div class="rc-meta">
+          <span class="tag">Jun 2026</span>
+          <span class="tag">Jan–Jun YTD</span>
+        </div>
+        <span class="rc-btn">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z"/></svg>
+          View Report
+        </span>
+      </a>
 
-      <div class="rc-icon">📊</div>
-      <h3>Balance Sheet</h3>
-      <div class="rc-desc">Assets, liabilities, and equity as of June 30, 2026. Includes cash position, inventory breakdown, liquidity ratios, and owner insights.</div>
-      <div class="rc-meta">
-        <span class="tag">Jun 30, 2026</span>
-        <span class="tag">vs May 2026</span>
-        <span class="tag">Balance Sheet</span>
-      </div>
-      <span class="btn">
-        <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2zm0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z"/></svg>
-        View Report
-      </span>
-    </a>
-
-    <!-- P&L -->
-    <a class="report-card" href="pl_report_protected.html">
-
-      <div class="rc-icon">📈</div>
-      <h3>Profit &amp; Loss</h3>
-      <div class="rc-desc">Revenue, COGS, and operating expenses for June 2026 and year-to-date. Includes island breakdown, expense detail, and waterfall analysis.</div>
-      <div class="rc-meta">
-        <span class="tag">Jun 2026 YTD</span>
-        <span class="tag">Jan–Jun 2026</span>
-        <span class="tag">P&amp;L</span>
-      </div>
-      <span class="btn">
-        <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2zm0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z"/></svg>
-        View Report
-      </span>
-    </a>
-
+    </div>
   </div>
 
 
 </div>
 
 <footer>
-  Kuhao, Inc. dba <span>Sig Zane Designs</span> &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; Confidential &amp; Proprietary
+  Kuhao, Inc. dba <span>Sig Zane Designs</span> &nbsp;·&nbsp; Confidential &amp; Proprietary
 </footer>
 
 </body>
