@@ -268,20 +268,41 @@ footer { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 20p
 footer span { color: var(--accent); }
 
 /* ── Responsive ── */
+/* ── 768px: tablet / large phone landscape ── */
 @media (max-width: 768px) {
-  .page-banner { padding: 20px; }
-  .banner-kpis { min-width: auto; }
-  .body-wrap   { padding: 20px 12px 56px; }
-  .banner-title h1 { font-size: var(--t-lg); }
-  .kpi-grid    { grid-template-columns: repeat(2,1fr); }
-  .two-col > * { flex: 1 1 100%; }
-  .three-col   { grid-template-columns: 1fr; }
-  .island-grid { grid-template-columns: 1fr 1fr; }
+  .page-banner      { padding: 16px; gap: 12px; }
+  .logo-box         { width: 60px; height: 44px; }
+  .logo-box img     { width: 60px; }
+  .banner-kpis      { min-width: auto; }
+  .banner-title h1  { font-size: var(--t-lg); }
+  .body-wrap        { padding: 18px 12px 56px; }
+  .sec              { margin: 22px 0 12px; }
+  .kpi-grid         { grid-template-columns: repeat(2, 1fr); }
+  .kc-val           { font-size: var(--t-xl); }
+  .two-col > *      { flex: 1 1 100%; }
+  .three-col        { grid-template-columns: 1fr; }
+  .island-grid      { grid-template-columns: 1fr 1fr; }
+  .table-card       { padding: 14px 10px; }
 }
+
+/* ── 520px: phone portrait ── */
+@media (max-width: 520px) {
+  .page-banner      { flex-wrap: wrap; }
+  .banner-sub       { display: none; }
+  .kc-val           { font-size: var(--t-lg); }
+  .kc-periods       { gap: 5px; }
+  .island-grid      { grid-template-columns: 1fr; }
+  thead th, tbody td { padding: 7px 8px; }
+  .bar-bg           { min-width: 32px; }
+}
+
+/* ── 420px: small phone ── */
 @media (max-width: 420px) {
-  .banner-title h1 { font-size: var(--t-base); }
-  .kpi-grid    { grid-template-columns: 1fr; }
-  .banner-kpis { display: none; }
+  .banner-title h1  { font-size: var(--t-base); }
+  .banner-kpis      { display: none; }
+  .kpi-grid         { grid-template-columns: 1fr; }
+  .kc-val           { font-size: var(--t-lg); }
+  .ins-grid         { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -373,6 +394,14 @@ footer span { color: var(--accent); }
         <div><div class="kc-period-lbl">June</div><div class="kc-val neg">($71K)</div></div>
         <div class="kc-divider"></div>
         <div><div class="kc-period-lbl">YTD</div><div class="kc-val pos">$157K</div></div>
+      </div>
+    </div>
+    <div class="kc red">
+      <div class="kc-lbl">Net Margin %</div>
+      <div class="kc-periods">
+        <div><div class="kc-period-lbl">June</div><div class="kc-val neg">(17.7%)</div></div>
+        <div class="kc-divider"></div>
+        <div><div class="kc-period-lbl">YTD</div><div class="kc-val pos">4.9%</div></div>
       </div>
     </div>
     <div class="kc yellow">
